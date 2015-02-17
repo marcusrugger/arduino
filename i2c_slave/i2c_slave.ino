@@ -1,3 +1,4 @@
+#include <Wire.h>
 
 class Led
 {
@@ -134,21 +135,41 @@ private:
 
   const int PIN_BUTTON_UP   = 2;
   const int PIN_BUTTON_DOWN = 4;
-  const int PIN_LED_MAIN    = 3;
+
+  const int PIN_LED_TEMPERATURE = 3;
+  const int PIN_LED_HUMIDITY    = 5;
+  const int PIN_LED_PRESSURE    = 6;
+  const int PIN_LED_TIME        = 9;
 
   static Board *_pInstance;
-
-  Led _mainLed;
 
   const Button  _buttonUp;
   const Button  _buttonDown;
 
+  Led _ledTemperature;
+  Led _ledHumidity;
+  Led _ledPressure;
+  Led _ledTime;
+
   Board(void)
-  : _mainLed(PIN_LED_MAIN),
-    _buttonUp(PIN_BUTTON_UP),
-    _buttonDown(PIN_BUTTON_DOWN)
+  : _buttonUp(PIN_BUTTON_UP),
+    _buttonDown(PIN_BUTTON_DOWN),
+    _ledTemperature(PIN_LED_TEMPERATURE),
+    _ledHumidity(PIN_LED_HUMIDITY),
+    _ledPressure(PIN_LED_PRESSURE),
+    _ledTime(PIN_LED_TIME)
   {
-    LedBrightnessControl::setOff().onLed(_mainLed);
+    auto off = LedBrightnessControl::setOff();
+
+    off.onLed(_ledTemperature);
+    off.onLed(_ledHumidity);
+    off.onLed(_ledPressure);
+    off.onLed(_ledTime);
+  }
+
+  static void staticOnReceive(int count)
+  {
+    getInstance().onReceive(count);
   }
 
 public:
@@ -160,16 +181,57 @@ public:
     return (*_pInstance);
   }
 
+  void initialize(unsigned char i2c_address)
+  {
+    Wire.begin(i2c_address);
+    Wire.onReceive(Board::staticOnReceive);
+  }
+
   void loop(void)
   {
-    auto control = LedBrightnessControl::setBrightness(_mainLed);
-
-    if (_buttonUp.isButtonPressed())
-      control.increment().onLed(_mainLed);
-    else if (_buttonDown.isButtonPressed())
-      control.decrement().onLed(_mainLed);
-
     delay(100);
+  }
+
+  void printinfo(char *s, unsigned int v)
+  {
+    Serial.print(s);
+    Serial.println(v);
+  }
+
+  void onReceive(int count)
+  {
+    Serial.print("count: ");
+    Serial.println(count);
+    unsigned char c;
+    unsigned long l = 0;
+    while (Wire.available() > 0)
+    {
+      c = Wire.read();
+      l = (l << 8) | c;
+      Serial.print(c);
+      Serial.print(", l: ");
+      Serial.print(l);
+      Serial.print(", Available: ");
+      Serial.println(Wire.available());
+    }
+
+    Serial.print(l);
+    Serial.println();
+
+    unsigned int led1 = (l & 0xff000000) >> 24;
+    unsigned int led2 = (l & 0x00ff0000) >> 16;
+    unsigned int led3 = (l & 0x0000ff00) >> 8;
+    unsigned int led4 = (l & 0x000000ff);
+
+    printinfo("led1: ", led1);
+    printinfo("led2: ", led2);
+    printinfo("led3: ", led3);
+    printinfo("led4: ", led4);
+
+    _ledTemperature.writeBrightness(led1);
+    _ledHumidity.writeBrightness(led2);
+    _ledPressure.writeBrightness(led3);
+    _ledTime.writeBrightness(led4);
   }
 };
 
@@ -178,7 +240,8 @@ Board *Board::_pInstance = NULL;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
+  Board::getInstance().initialize(0x77);
 }
 
 void loop()

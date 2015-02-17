@@ -136,9 +136,16 @@ private:
   const int PIN_BUTTON_DOWN = 4;
   const int PIN_LED_MAIN    = 3;
 
+  const int PIN_TRI_RED     = 9;
+  const int PIN_TRI_GREEN   = 10;
+  const int PIN_TRI_BLUE    = 11;
+
   static Board *_pInstance;
 
   Led _mainLed;
+  Led _triRed;
+  Led _triGreen;
+  Led _triBlue;
 
   const Button  _buttonUp;
   const Button  _buttonDown;
@@ -146,9 +153,16 @@ private:
   Board(void)
   : _mainLed(PIN_LED_MAIN),
     _buttonUp(PIN_BUTTON_UP),
-    _buttonDown(PIN_BUTTON_DOWN)
+    _buttonDown(PIN_BUTTON_DOWN),
+    _triRed(PIN_TRI_RED),
+    _triGreen(PIN_TRI_GREEN),
+    _triBlue(PIN_TRI_BLUE)
   {
-    LedBrightnessControl::setOff().onLed(_mainLed);
+    auto off = LedBrightnessControl::setOff();
+    off.onLed(_mainLed);
+    off.onLed(_triRed);
+    off.onLed(_triGreen);
+    off.onLed(_triBlue);
   }
 
 public:
@@ -160,16 +174,47 @@ public:
     return (*_pInstance);
   }
 
+  // void loop(void)
+  // {
+  //   auto control = LedBrightnessControl::setBrightness(_mainLed);
+
+  //   if (_buttonUp.isButtonPressed())
+  //     control.increment().onLed(_mainLed);
+  //   else if (_buttonDown.isButtonPressed())
+  //     control.decrement().onLed(_mainLed);
+
+  //   delay(100);
+  // }
+
   void loop(void)
   {
     auto control = LedBrightnessControl::setBrightness(_mainLed);
 
-    if (_buttonUp.isButtonPressed())
-      control.increment().onLed(_mainLed);
-    else if (_buttonDown.isButtonPressed())
-      control.decrement().onLed(_mainLed);
-
-    delay(100);
+    for (int r = 0; r < 2; r++)
+    {
+//      _triRed.writeBrightness(255 * r);
+      digitalWrite(PIN_TRI_RED, r == 1 ? HIGH : LOW);
+      for (int g = 0; g < 2; g++)
+      {
+//        _triGreen.writeBrightness(255 * g);
+        digitalWrite(PIN_TRI_GREEN, g == 1 ? HIGH : LOW);
+        for (int b = 0; b < 2; b++)
+        {
+//          _triBlue.writeBrightness(255 * b);
+          digitalWrite(PIN_TRI_BLUE, b == 1 ? HIGH : LOW);
+          for (int brightness = 0; brightness < 16; brightness++)
+          {
+            LedBrightnessControl::setBrightness(brightness).onLed(_mainLed);
+            delay(100);
+          }
+          for (int brightness = 0; brightness < 16; brightness++)
+          {
+            LedBrightnessControl::setBrightness(15 - brightness).onLed(_mainLed);
+            delay(100);
+          }
+        }
+      }
+    }
   }
 };
 
