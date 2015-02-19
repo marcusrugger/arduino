@@ -172,6 +172,32 @@ private:
     getInstance().onReceive(count);
   }
 
+  void printinfo(char *s, unsigned int v, unsigned int format = DEC) const
+  {
+    Serial.print(s);
+    Serial.println(v, format);
+  }
+
+  void flushWire(void) const
+  {
+      while (Wire.available()) Wire.read();
+  }
+
+  void onRegisterLed(Led led)
+  {
+    unsigned int count = Wire.available();
+    if (count == 1)
+    {
+      unsigned char value = Wire.read();
+      led.writeBrightness(value);
+    }
+    else
+    {
+      printinfo("onRegisterLed: invalid number of bytes on Wire: ", count);
+      flushWire();
+    }
+  }
+
 public:
 
   static Board &getInstance(void)
@@ -192,46 +218,41 @@ public:
     delay(100);
   }
 
-  void printinfo(char *s, unsigned int v)
-  {
-    Serial.print(s);
-    Serial.println(v);
-  }
-
   void onReceive(int count)
   {
-    Serial.print("count: ");
-    Serial.println(count);
-    unsigned char c;
-    unsigned long l = 0;
-    while (Wire.available() > 0)
+    // Serial.print("onReceive: count: ");
+    // Serial.println(count);
+
+    while (Wire.available())
     {
-      c = Wire.read();
-      l = (l << 8) | c;
-      Serial.print(c);
-      Serial.print(", l: ");
-      Serial.print(l);
-      Serial.print(", Available: ");
-      Serial.println(Wire.available());
+      unsigned char command = Wire.read();
+      // Serial.print("onReceive: command: ");
+      // Serial.println(command, HEX);
+
+      switch (command)
+      {
+        case 0x00:
+          onRegisterLed(_ledTemperature);
+          break;
+
+        case 0x01:
+          onRegisterLed(_ledHumidity);
+          break;
+
+        case 0x02:
+          onRegisterLed(_ledPressure);
+          break;
+
+        case 0x03:
+          onRegisterLed(_ledTime);
+          break;
+
+        default:
+          printinfo("onReceive: unrecognized command: ", command, HEX);
+          flushWire();
+          break;
+      }
     }
-
-    Serial.print(l);
-    Serial.println();
-
-    unsigned int led1 = (l & 0xff000000) >> 24;
-    unsigned int led2 = (l & 0x00ff0000) >> 16;
-    unsigned int led3 = (l & 0x0000ff00) >> 8;
-    unsigned int led4 = (l & 0x000000ff);
-
-    printinfo("led1: ", led1);
-    printinfo("led2: ", led2);
-    printinfo("led3: ", led3);
-    printinfo("led4: ", led4);
-
-    _ledTemperature.writeBrightness(led1);
-    _ledHumidity.writeBrightness(led2);
-    _ledPressure.writeBrightness(led3);
-    _ledTime.writeBrightness(led4);
   }
 };
 
