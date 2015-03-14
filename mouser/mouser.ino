@@ -1,31 +1,55 @@
-//Arduino PWM Speed Control：
-int E1 = 5;
-int M1 = 4;
-int E2 = 6;
-int M2 = 7;
+#include "motor.h"
+
+Motor motor_left(Motor::MOTORSHIELD_IN1, Motor::MOTORSHIELD_IN2, Motor::SPEEDPIN_A);
+Motor motor_right(Motor::MOTORSHIELD_IN4, Motor::MOTORSHIELD_IN3, Motor::SPEEDPIN_B);
+
+int count = Motor::MAX_SPEEDS;
+bool flag = false;
+
+bool isActive(void)
+{
+    return false;
+}
 
 void setup()
 {
-    pinMode(M1, OUTPUT);
-    pinMode(M2, OUTPUT);
+    Serial.begin(9600);
+    if (isActive())
+    {
+        motor_left.setSpeed(Motor::MAX_SPEEDS-1);
+        motor_right.setSpeed(Motor::MAX_SPEEDS-1);
+        motor_left.setDirection(Motor::FORWARD);
+        motor_right.setDirection(Motor::FORWARD);
+    }
 }
 
 void loop()
 {
-    int value = 0;
+    if (isActive())
+    {
+        if (--count == 0)
+        {
+            count = Motor::MAX_SPEEDS;
 
-    digitalWrite(M1, LOW);
-    digitalWrite(M2, HIGH);
+            if (flag)
+            {
+                motor_left.setSpeed(Motor::MAX_SPEEDS-1);
+                motor_right.setSpeed(Motor::MAX_SPEEDS-1);
+                flag = false;
+            }
+            else
+            {
+                motor_left.setSpeed(0);
+                motor_right.setSpeed(0);
+                flag = true;
+            }
 
-    analogWrite(E1, value); //PWM Speed Control
-    analogWrite(E2, value); //PWM Speed Control
+            delay(5000);
+        }
 
-    // for(value = 0 ; value <= 255; value+=5)
-    // {
-    //     digitalWrite(M1,HIGH);
-    //     digitalWrite(M2, HIGH);
-    //     analogWrite(E1, value); //PWM Speed Control
-    //     analogWrite(E2, value); //PWM Speed Control
-    //     delay(30);
-    // }
+
+        motor_left.tick();
+        motor_right.tick();
+        delay(100);
+    }
 }
