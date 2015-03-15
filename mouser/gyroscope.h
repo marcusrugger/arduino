@@ -1,7 +1,8 @@
 #include <Arduino.h>
+#include "base-i2c.h"
 
 
-class Gyroscope
+class Gyroscope : public BaseI2C
 {
 private:
 
@@ -16,9 +17,6 @@ private:
     static Gyroscope *_pInstance;
 
     Gyroscope(void);
-
-    void write8(uint8_t reg, uint8_t value);
-    uint8_t read8(uint8_t reg);
 
 
 public:
