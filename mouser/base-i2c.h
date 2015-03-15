@@ -1,3 +1,6 @@
+#ifndef __MOUSER_BASE_I2C__
+#define __MOUSER_BASE_I2C__
+
 #include <Arduino.h>
 
 
@@ -16,3 +19,5 @@ protected:
     uint8_t read8(uint8_t reg);
 
 };
+
+#endif

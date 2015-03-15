@@ -2,6 +2,7 @@
 #include "dfrobot-shield-l298p.h"
 #include "movement.h"
 #include "gyroscope.h"
+#include "accelerometer.h"
 #include "datalog.h"
 #include <Wire.h>
 
@@ -42,18 +43,33 @@ void setup()
     delay(2000);
 
     Gyroscope::instance();
+    Accelerometer::instance();
 
     delay(5000);
 }
 
 
-void logDelay(int d)
+void logGyroscope(void)
 {
     Gyroscope *gyro = Gyroscope::instance();
+    gyro->readGyro();
+    datalog.add(gyro->x, gyro->y, gyro->z);
+}
+
+
+void logAccelerator(void)
+{
+    Accelerometer *accel = Accelerometer::instance();
+    accel->readAccelerometer();
+    datalog.add(accel->x, accel->y, accel->z);
+}
+
+
+void logDelay(int d)
+{
     for (int a = 0; a < d; a++)
     {
-        gyro->readGyro();
-        datalog.add(gyro->x, gyro->y, gyro->z);
+        logAccelerator();
         delay(100);
     }
 }
@@ -64,8 +80,6 @@ void loop()
     if (isActive())
     {
         delay(10000);
-        Gyroscope::instance()->readGyro();
-        datalog.add(Gyroscope::instance()->x, Gyroscope::instance()->y, Gyroscope::instance()->z);
 
         // Movement::instance()->goForward(192);
         // logDelay(8);

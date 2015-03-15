@@ -19,12 +19,16 @@ Accelerometer::Accelerometer(void)
   x(0), y(0), z(0)
 {
     write8(CTRL_REG1_A, 0x47);
+    write8(CTRL_REG4_A, 0x00);
+    uint8_t val = read8(CTRL_REG1_A);
+    Serial.print("Accelerometer CTRL_REG1_A: ");
+    Serial.println(val, HEX);
 }
 
 
 void Accelerometer::readAccelerometer(void)
 {
-    Serial.print("Gyro: ");
+    Serial.print("Accelerometer: ");
 
     Wire.beginTransmission(DEVICE_ADDRESS);
     Wire.write(OUT_X_L_A | 0x80);
@@ -41,9 +45,9 @@ void Accelerometer::readAccelerometer(void)
     uint8_t zlo = Wire.read();
     uint8_t zhi = Wire.read();
 
-    x = (int) ((xhi << 8) | xlo);
-    y = (int) ((yhi << 8) | ylo);
-    z = (int) ((zhi << 8) | zlo);
+    x = (int) ((xhi << 8) | xlo) >> 4;
+    y = (int) ((yhi << 8) | ylo) >> 4;
+    z = (int) ((zhi << 8) | zlo) >> 4;
 
     Serial.print("X: ");
     Serial.print(x);

@@ -48,4 +48,11 @@ void Gyroscope::readGyro(void)
     x = (int) ((xhi << 8) | xlo);
     y = (int) ((yhi << 8) | ylo);
     z = (int) ((zhi << 8) | zlo);
+
+    Serial.print("X: ");
+    Serial.print(x);
+    Serial.print(", Y: ");
+    Serial.print(y);
+    Serial.print(", Z: ");
+    Serial.println(z);
 }
