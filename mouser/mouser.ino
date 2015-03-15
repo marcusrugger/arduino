@@ -1,16 +1,8 @@
 #include "seeed-motorshield.h"
 #include "dfrobot-shield-l298p.h"
 #include "movement.h"
+#include "gyroscope.h"
 #include <Wire.h>
-
-
-const uint8_t GYROSCOPE_ADDRESS         = 0x6b; //0x35;
-const uint8_t GYRO_REGISTER_WHO_AM_I    = 0x0f;
-const uint8_t GYRO_REGISTER_CTRL_REG1   = 0x20;
-const uint8_t GYRO_REGISTER_CTRL_REG2   = 0x21;
-const uint8_t GYRO_REGISTER_CTRL_REG3   = 0x22;
-const uint8_t GYRO_REGISTER_CTRL_REG4   = 0x23;
-const uint8_t GYRO_REGISTER_OUT_X_L     = 0x28;
 
 
 bool isActive(void)
@@ -37,45 +29,15 @@ void createSeeedMotors(void)
 }
 
 
-void write8(uint8_t reg, uint8_t value)
-{
-    Wire.beginTransmission(GYROSCOPE_ADDRESS);
-    Wire.write(reg);
-    Wire.write(value);
-    Wire.endTransmission();
-}
-
-
-uint8_t read8(uint8_t reg)
-{
-    uint8_t value;
-
-    Wire.beginTransmission((uint8_t) GYROSCOPE_ADDRESS);
-    Wire.write(reg);
-    Wire.endTransmission();
-
-    Wire.requestFrom(GYROSCOPE_ADDRESS, (uint8_t) 1);
-    while (!Wire.available()); // Wait for data to arrive.
-    value = Wire.read();
-    Wire.endTransmission();
-
-    return value;
-}
-
-
 void setup()
 {
     Serial.begin(9600);
     createSeeedMotors();
+    Wire.begin();
 
     delay(2000);
 
-    Wire.begin();
-    uint8_t id = read8(GYRO_REGISTER_WHO_AM_I);
-    Serial.println(id, HEX);
-    write8(GYRO_REGISTER_CTRL_REG1, 0x00);
-    write8(GYRO_REGISTER_CTRL_REG1, 0x0F);
-    write8(GYRO_REGISTER_CTRL_REG4, 0x20);
+    Gyroscope::instance();
 
     delay(5000);
 }
@@ -83,34 +45,7 @@ void setup()
 
 void loop()
 {
-    Serial.print("Gyro: ");
-
-    Wire.beginTransmission(GYROSCOPE_ADDRESS);
-    Wire.write(GYRO_REGISTER_OUT_X_L | 0x80);
-    Wire.endTransmission();
-
-    Wire.requestFrom(GYROSCOPE_ADDRESS, (uint8_t) 6);
-
-    /* Wait around until enough data is available */
-    while (Wire.available() < 6);
-    uint8_t xlo = Wire.read();
-    uint8_t xhi = Wire.read();
-    uint8_t ylo = Wire.read();
-    uint8_t yhi = Wire.read();
-    uint8_t zlo = Wire.read();
-    uint8_t zhi = Wire.read();
-
-    int x = (int) ((xhi << 8) | xlo);
-    int y = (int) ((yhi << 8) | ylo);
-    int z = (int) ((zhi << 8) | zlo);
-
-    Serial.print("X: ");
-    Serial.print(x);
-    Serial.print(", Y: ");
-    Serial.print(y);
-    Serial.print(", Z: ");
-    Serial.println(z);
-
+    Gyroscope::instance()->readGyro();
     delay(1000);
 
     if (isActive())
