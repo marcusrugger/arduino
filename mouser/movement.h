@@ -32,4 +32,6 @@ public:
     virtual void turnLeft(uint8_t speed);
     virtual void turnRight(uint8_t speed);
 
+    virtual void adjustForYaw(int16_t yaw);
+
 };

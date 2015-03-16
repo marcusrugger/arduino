@@ -18,15 +18,26 @@ private:
 
     Gyroscope(void);
 
+    // Unadjusted gyro values
+    int16_t _uax, _uay, _uaz;
+
+    // Adjustments to calculated adjusted values
+    int16_t _ax, _ay, _az;
+
+    // Used during sampling to calculate adjustments
+    int32_t _sx, _sy, _sz;
+    int8_t _number_of_samples;
+
+    void unadjustedReadGyro(void);
+
 
 public:
 
-    int16_t x;
-    int16_t y;
-    int16_t z;
+    int16_t x, y, z;
 
     static Gyroscope *instance(void);
 
+    void normalize(void);
     void readGyro(void);
 
 };

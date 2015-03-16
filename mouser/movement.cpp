@@ -91,3 +91,7 @@ void Movement::turnRight(uint8_t speed)
     setSpeed(speed);
     turnRight();
 }
+
+
+void Movement::adjustForYaw(int16_t yaw)
+{}
