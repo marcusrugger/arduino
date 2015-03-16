@@ -86,102 +86,94 @@ void setup()
 // }
 
 
-void strategy1()
-{
-    const int GYRO_MAX_VALUE    = 1024;
-    const int GYRO_MAX_X        = (GYRO_MAX_VALUE - 1);
-    const int GYRO_DIVIDER_X    = (GYRO_MAX_VALUE / 128);
-    const int GYRO_FLOOR        = 128;
+// void strategy1()
+// {
+//     const int GYRO_MAX_VALUE    = 1024;
+//     const int GYRO_MAX_X        = (GYRO_MAX_VALUE - 1);
+//     const int GYRO_DIVIDER_X    = (GYRO_MAX_VALUE / 128);
+//     const int GYRO_FLOOR        = 128;
 
-    Gyroscope *gyro = Gyroscope::instance();
-    gyro->readGyro();
+//     Gyroscope *gyro = Gyroscope::instance();
+//     gyro->readGyro();
 
-    int gx = gyro->x - GYRO_FLOOR;
-    if (gx < 0)
-        gx = 0;
-    else if (gx > GYRO_MAX_X)
-        gx = GYRO_MAX_X;
+//     int gx = gyro->x - GYRO_FLOOR;
+//     if (gx < 0)
+//         gx = 0;
+//     else if (gx > GYRO_MAX_X)
+//         gx = GYRO_MAX_X;
 
-    int speed = (GYRO_MAX_X - gx) / GYRO_DIVIDER_X + 128;
-    Movement::instance()->goForward((uint8_t) speed);
+//     int speed = (GYRO_MAX_X - gx) / GYRO_DIVIDER_X + 128;
+//     Movement::instance()->goForward((uint8_t) speed);
 
-    datalog.add(gx, 0, speed);
-}
+//     datalog.add(gx, 0, speed);
+// }
 
 
-void strategy2()
-{
-    static int mode = 0;
-    const uint8_t max_speed         = 255;
-    const uint8_t base_speed        = 127;
-    const uint8_t add_speed         = 32;
-    static uint8_t current_speed    = base_speed;
+// void strategy2()
+// {
+//     static int mode = 0;
+//     const uint8_t max_speed         = 255;
+//     const uint8_t base_speed        = 127;
+//     const uint8_t add_speed         = 32;
+//     static uint8_t current_speed    = base_speed;
 
-    if (current_speed == max_speed)
-        return;
+//     if (current_speed == max_speed)
+//         return;
 
-    if (mode == 0)
-    {
-        mode += 1;
-        Movement::instance()->goForward(current_speed);
-    }
-    else if (mode == 1)
-    {
-        Gyroscope *gyro = Gyroscope::instance();
-        gyro->readGyro();
-        if (gyro->x > 16)
-            mode += 1;
-        datalog.add(gyro->x, gyro->z, current_speed);
-    }
-    else if (mode == 2)
-    {
-        Gyroscope *gyro = Gyroscope::instance();
-        gyro->readGyro();
-        if (gyro->x < 0)
-        {
-            current_speed += add_speed;
-            Movement::instance()->goForward(current_speed);
-        }
-        datalog.add(gyro->x, gyro->z, current_speed);
-    }
-}
-
+//     if (mode == 0)
+//     {
+//         mode += 1;
+//         Movement::instance()->goForward(current_speed);
+//     }
+//     else if (mode == 1)
+//     {
+//         Gyroscope *gyro = Gyroscope::instance();
+//         gyro->readGyro();
+//         if (gyro->x > 16)
+//             mode += 1;
+//         datalog.add(gyro->x, gyro->z, current_speed);
+//     }
+//     else if (mode == 2)
+//     {
+//         Gyroscope *gyro = Gyroscope::instance();
+//         gyro->readGyro();
+//         if (gyro->x < 0)
+//         {
+//             current_speed += add_speed;
+//             Movement::instance()->goForward(current_speed);
+//         }
+//         datalog.add(gyro->x, gyro->z, current_speed);
+//     }
+// }
 
 void spin_it()
 {
     static int mode = 0;
-    static float degreesTurned = 0.0;
+    Gyroscope *gyro = Gyroscope::instance();
 
-    if (mode == 0)
+    switch (mode)
     {
-        Movement::instance()->turnLeft(255);
-        mode += 1;
-    }
-    else if (mode == 1)
-    {
-        Gyroscope *gyro = Gyroscope::instance();
-        gyro->readGyro();
-        float dps = ((float) abs(gyro->z)) * 0.00875;
-        degreesTurned += 0.1 * dps;
-        if (degreesTurned >= (360.0 - dps / 10.0))
-        {
-            Movement::instance()->stop();
-            degreesTurned = 0.0;
+        case 0:
+            Movement::instance()->turnLeft(255);
             mode += 1;
-            Movement::instance()->turnRight(255);
-        }
-    }
-    else if (mode == 2)
-    {
-        Gyroscope *gyro = Gyroscope::instance();
-        gyro->readGyro();
-        float dps = ((float) abs(gyro->z)) * 0.00875;
-        degreesTurned += 0.1 * dps;
-        if (degreesTurned >= (360.0 - dps / 4.0))
-        {
-            Movement::instance()->stop();
-            mode += 1;
-        }
+            break;
+
+        case 1:
+            if (fabs(gyro->hz) >= (360.0 - 0.1 * fabs(gyro->z)))
+            {
+                Movement::instance()->stop();
+                mode += 1;
+                Movement::instance()->turnRight(255);
+            }
+            break;
+
+        case 2:
+            if (fabs(gyro->hz) <= (0.0 + 0.25 * fabs(gyro->z)))
+            {
+                Movement::instance()->stop();
+                mode += 1;
+            }
+            break;
     }
 }
 
@@ -193,6 +185,7 @@ void loop()
     if (isActive() && countdown > 0)
     {
         //countdown--;
+        Gyroscope::instance()->readGyro();
         spin_it();
         delay(100);
     }

@@ -33,7 +33,19 @@ private:
 
 public:
 
-    int16_t x, y, z;
+    float time_interval;
+
+    // Multiplier used to convert register values to dps
+    float multiplier;
+
+    // Adjusted sensor values
+    int16_t ax, ay, az;
+
+    // Degrees per second
+    float   x, y, z;
+
+    // Heading
+    float   hx, hy, hz;
 
     static Gyroscope *instance(void);
 
