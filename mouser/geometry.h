@@ -6,7 +6,24 @@ namespace Geometry
 {
 
 class Point;
+class EulerAngles;
 class RotationMatrix;
+
+
+const float pi = 3.1415926536;
+
+
+inline float DegToRad(float a)
+{
+    return a * pi / 180;
+}
+
+
+inline float RadToDeg(float a)
+{
+    return a * 180 / pi;
+}
+
 
 class Point
 {
@@ -21,12 +38,27 @@ public:
 
 };
 
+
+class EulerAngles
+{
+public:
+
+    float a, b, c;  // Alpha, Beta, Gamma;
+
+    EulerAngles(float na, float nb, float nc) : a(DegToRad(na)), b(DegToRad(nb)), c(DegToRad(nc))
+    {}
+};
+
+
 class RotationMatrix
 {
 public:
 
     float matrix[3][3];
 
+    static RotationMatrix createLeftHanded(EulerAngles o);
+    static RotationMatrix createLeftHanded(float a, float b, float c);
+    static RotationMatrix createRightHanded(float a, float b, float c);
     static RotationMatrix createYaw(float a);
     static RotationMatrix createPitch(float a);
     static RotationMatrix createRoll(float a);

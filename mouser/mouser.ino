@@ -4,6 +4,8 @@
 #include "gyroscope.h"
 #include "accelerometer.h"
 #include "datalog.h"
+#include "geometry.h"
+#include <math.h>
 #include <Wire.h>
 
 
@@ -178,22 +180,62 @@ void spin_it()
 }
 
 
+using namespace Geometry;
 void loop()
 {
-    // Gyroscope::instance()->readGyro();
-    // delay(1000);
-    if (isActive() && countdown > 0)
+    static bool flag = true;
+
+    if (flag)
     {
-        //countdown--;
-        Gyroscope::instance()->readGyro();
-        spin_it();
-        delay(100);
+        EulerAngles o(0.0, 0.0, 45.0);
+        RotationMatrix m = RotationMatrix::createLeftHanded(o);
+        Point p1(0, 1, 0);
+        Point p2(m, p1);
+
+        Serial.print("Point: ");
+        Serial.print(p2.x);     Serial.print(", ");
+        Serial.print(p2.y);     Serial.print(", ");
+        Serial.println(p2.z);
+
+        // Serial.println("Begin...");
+        // Geometry::Point p1(1, 0, 0);
+        // Geometry::Point p2(0, 0, 0);
+        // const int step = 15;
+
+        // for (int a = 0; a < 360; a += step)
+        // {
+        //     for (int b = 0; b < 360; b += step)
+        //     {
+        //         for (int c = 0; c < 360; c += step)
+        //         {
+        //             Geometry::RotationMatrix m(DegToRad((float) a), DegToRad((float) b), DegToRad((float) c));
+        //             Geometry::Point p3(m, p1);
+        //             p2.x += p3.x;
+        //             p2.y += p3.y;
+        //             p2.z += p3.z;
+        //         }
+        //     }
+        // }
+
+        // Serial.print("Point: ");
+        // Serial.print(p2.x);     Serial.print(", ");
+        // Serial.print(p2.y);     Serial.print(", ");
+        // Serial.println(p2.z);
+
+        flag = false;
     }
-    else if (countdown == 0)
-    {
-        Movement::instance()->stop();
-        delay(30000);
-        datalog.dump();
-        countdown = -1;
-    }
+    // if (isActive() && countdown > 0)
+    // {
+    //     //countdown--;
+    //     Gyroscope::instance()->readGyro();
+    //     spin_it();
+    //     delay(100);
+    // }
+    // else if (countdown == 0)
+    // {
+    //     Movement::instance()->stop();
+    //     delay(30000);
+    //     datalog.dump();
+    //     countdown = -1;
+    // }
 }
