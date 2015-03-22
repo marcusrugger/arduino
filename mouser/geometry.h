@@ -31,9 +31,13 @@ public:
 
     float x, y, z;
 
+    Point(void) : x(0.0), y(0.0), z(0.0)
+    {}
+
     Point(float nx, float ny, float nz) : x(nx), y(ny), z(nz)
     {}
 
+    Point(const Point &p);
     Point(const RotationMatrix &m, const Point &p);
 
 };
@@ -45,8 +49,13 @@ public:
 
     float a, b, c;  // Alpha, Beta, Gamma;
 
+    EulerAngles(void) : a(0.0), b(0.0), c(0.0)
+    {}
+
     EulerAngles(float na, float nb, float nc) : a(DegToRad(na)), b(DegToRad(nb)), c(DegToRad(nc))
     {}
+
+    EulerAngles(const EulerAngles &m);
 };
 
 
@@ -59,9 +68,6 @@ public:
     static RotationMatrix createLeftHanded(EulerAngles o);
     static RotationMatrix createLeftHanded(float a, float b, float c);
     static RotationMatrix createRightHanded(float a, float b, float c);
-    static RotationMatrix createYaw(float a);
-    static RotationMatrix createPitch(float a);
-    static RotationMatrix createRoll(float a);
 
     RotationMatrix(void)
     {

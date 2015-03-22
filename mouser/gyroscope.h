@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "base-i2c.h"
-
+#include "geometry.h"
 
 class Gyroscope : public BaseI2C
 {
@@ -42,10 +42,7 @@ public:
     int16_t ax, ay, az;
 
     // Degrees per second
-    float   x, y, z;
-
-    // Heading
-    float   hx, hy, hz;
+    Geometry::EulerAngles a;
 
     static Gyroscope *instance(void);
 

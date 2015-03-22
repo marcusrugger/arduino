@@ -19,8 +19,6 @@ Gyroscope::Gyroscope(void)
   multiplier(0.00875),
   time_interval(0.1),
   ax(0), ay(0), az(0),
-  x(0.0), y(0.0), z(0.0),
-  hx(0.0), hy(0.0), hz(0.0),
   _ax(0), _ay(0), _az(0),
   _sx(0), _sy(0), _sz(0),
   _number_of_samples(0)
@@ -82,13 +80,11 @@ void Gyroscope::readGyro(void)
     ay  = _uay - _ay;
     az  = _uaz - _az;
 
-    x   = multiplier * (float) ax;
-    y   = multiplier * (float) ay;
-    z   = multiplier * (float) az;
+    Geometry::EulerAngles m(multiplier * (float) ax,
+                            multiplier * (float) ay,
+                            multiplier * (float) az);
 
-    hx += time_interval * x;
-    hy += time_interval * y;
-    hz += time_interval * z;
+    a = m;
 
     // Serial.print("X: ");
     // Serial.print(x);
