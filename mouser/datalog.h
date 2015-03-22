@@ -12,7 +12,7 @@ public:
         uint8_t speed;
     };
 
-    static const int MAX_SAMPLES = (900/sizeof(dataset));
+    static const int MAX_SAMPLES = (32/sizeof(dataset));
     dataset _datalog[MAX_SAMPLES];
     int16_t _current_index;
 

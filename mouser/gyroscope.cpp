@@ -70,10 +70,8 @@ void Gyroscope::unadjustedReadGyro(void)
 }
 
 
-void Gyroscope::readGyro(void)
+void Gyroscope::readGyroscope(void)
 {
-    // Serial.print("Gyro: ");
-
     unadjustedReadGyro();
 
     ax  = _uax - _ax;
@@ -85,11 +83,4 @@ void Gyroscope::readGyro(void)
                             multiplier * (float) az);
 
     a = m;
-
-    // Serial.print("X: ");
-    // Serial.print(x);
-    // Serial.print(", Y: ");
-    // Serial.print(y);
-    // Serial.print(", Z: ");
-    // Serial.println(z);
 }

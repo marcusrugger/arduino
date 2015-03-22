@@ -16,7 +16,9 @@ Accelerometer *Accelerometer::instance(void)
 
 Accelerometer::Accelerometer(void)
 : BaseI2C(DEVICE_ADDRESS),
-  rx(0), ry(0), rz(0)
+  rx(0), ry(0), rz(0),
+  _sx(0.0), _sy(0.0), _sz(0.0),
+  _number_of_samples(0)
 {
     write8(CTRL_REG1_A, 0x47);
     write8(CTRL_REG4_A, 0x08);
@@ -26,10 +28,16 @@ Accelerometer::Accelerometer(void)
 }
 
 
-void Accelerometer::readAccelerometer(void)
+Geometry::Point Accelerometer::calibrate(const Geometry::Point & p) const
 {
-    // Serial.print("Accelerometer: ");
+    return Geometry::Point(-(ax * p.x + bx),
+                            (ay * p.y + by),
+                            (az * p.z + bz));
+}
 
+
+void Accelerometer::unadjustedReadAccelerometer(void)
+{
     Wire.beginTransmission(DEVICE_ADDRESS);
     Wire.write(OUT_X_L_A | 0x80);
     Wire.endTransmission();
@@ -48,17 +56,34 @@ void Accelerometer::readAccelerometer(void)
     rx = (int) ((xhi << 8) | xlo) >> 4;
     ry = (int) ((yhi << 8) | ylo) >> 4;
     rz = (int) ((zhi << 8) | zlo) >> 4;
+}
+
+
+void Accelerometer::normalize(void)
+{
+    unadjustedReadAccelerometer();
+
+    _sx += rx;
+    _sy += ry;
+    _sz += rz;
+
+    ++_number_of_samples;
+
+    float x = ((float) _sx) / ((float) _number_of_samples);
+    float y = ((float) _sy) / ((float) _number_of_samples);
+    float z = ((float) _sz) / ((float) _number_of_samples);
+
+    d = calibrate(Geometry::Point(x, y, z));
+}
+
+
+void Accelerometer::readAccelerometer(void)
+{
+    unadjustedReadAccelerometer();
 
     Geometry::Point p(ax * ((float) rx) + bx,
                       ay * ((float) ry) + by,
                       az * ((float) rz) + bz);
 
-    a = p;
-
-    // Serial.print("X: ");
-    // Serial.print(x);
-    // Serial.print(", Y: ");
-    // Serial.print(y);
-    // Serial.print(", Z: ");
-    // Serial.println(z);
+    a = calibrate(Geometry::Point((float) rx, (float) ry, (float) rz));
 }

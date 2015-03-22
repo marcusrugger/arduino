@@ -38,7 +38,7 @@ public:
     // Multiplier used to convert register values to dps
     float multiplier;
 
-    // Adjusted sensor values
+    // Calibrated sensor values
     int16_t ax, ay, az;
 
     // Degrees per second
@@ -47,6 +47,6 @@ public:
     static Gyroscope *instance(void);
 
     void normalize(void);
-    void readGyro(void);
+    void readGyroscope(void);
 
 };

@@ -19,17 +19,26 @@ private:
 
     Accelerometer(void);
 
+    // Used during sampling to calculate adjustments
+    int32_t _sx, _sy, _sz;
+    int8_t  _number_of_samples;
+
+    void unadjustedReadAccelerometer(void);
+    Geometry::Point calibrate(const Geometry::Point & p) const;
 
 public:
 
-    // Values from sensor
+    // Unadjusted values from sensor
     int16_t rx, ry, rz;
 
-    // Adjusted values
+    Geometry::Point d;
+
+    // Calibrated values
     Geometry::Point a;
 
     static Accelerometer *instance(void);
 
+    void normalize(void);
     void readAccelerometer(void);
 
 };

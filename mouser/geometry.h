@@ -40,6 +40,10 @@ public:
     Point(const Point &p);
     Point(const RotationMatrix &m, const Point &p);
 
+    Point operator +(const Point &p) const;
+    Point operator -(const Point &p) const;
+    Point operator *(float t) const;
+
 };
 
 
@@ -65,9 +69,13 @@ public:
 
     float matrix[3][3];
 
-    static RotationMatrix createLeftHanded(EulerAngles o);
+    static RotationMatrix createLeftHanded(const EulerAngles &o);
     static RotationMatrix createLeftHanded(float a, float b, float c);
     static RotationMatrix createRightHanded(float a, float b, float c);
+
+    static RotationMatrix createYaw(float a);
+    static RotationMatrix createPitch(float a);
+    static RotationMatrix createRoll(float a);
 
     RotationMatrix(void)
     {
@@ -75,6 +83,28 @@ public:
         matrix[1][0] = 0.0; matrix[1][1] = 1.0; matrix[1][2] = 0.0;
         matrix[2][0] = 0.0; matrix[2][1] = 0.0; matrix[2][2] = 1.0;
     }
+
+    RotationMatrix operator *(const RotationMatrix &m) const;
+
+    Point rotate(const Point &p) const;
+};
+
+
+class Matrix44
+{
+public:
+
+    float matrix[4][4];
+
+    Matrix44(void);
+    Matrix44(const Matrix44 &m);
+    Matrix44(const EulerAngles &o, const Point &p);
+
+    Matrix44 operator *(const Matrix44 &m) const;
+
+    Point translate(const Point &p) const;
+    Point rotate(const Point &p) const;
+    Matrix44 rotate(const EulerAngles &o) const;
 };
 
 }
