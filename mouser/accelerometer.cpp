@@ -18,10 +18,13 @@ Accelerometer::Accelerometer(void)
 : BaseI2C(DEVICE_ADDRESS),
   rx(0), ry(0), rz(0),
   _sx(0.0), _sy(0.0), _sz(0.0),
+  _min(0x7fff, 0x7fff, 0x7fff),
+  _max(0x8000, 0x8000, 0x8000),
+  _difference(0, 0, 0),
   _number_of_samples(0)
 {
-    write8(CTRL_REG1_A, 0x47);
-    write8(CTRL_REG4_A, 0x08);
+    write8(CTRL_REG1_A, REG1_10HZ | REG1_XEN | REG1_YEN | REG1_ZEN);
+    write8(CTRL_REG4_A, REG4_FS_2 | REG4_HR);
     uint8_t val = read8(CTRL_REG1_A);
     Serial.print("Accelerometer CTRL_REG1_A: ");
     Serial.println(val, HEX);
@@ -30,9 +33,10 @@ Accelerometer::Accelerometer(void)
 
 Geometry::Point Accelerometer::calibrate(const Geometry::Point & p) const
 {
-    return Geometry::Point(-(ax * p.x + bx),
-                            (ay * p.y + by),
-                            (az * p.z + bz));
+    // return Geometry::Point(-(ax * p.x + bx),
+    //                         (ay * p.y + by),
+    //                         (az * p.z + bz));
+    return Geometry::Point(-p.x, p.y, p.z);
 }
 
 
@@ -53,15 +57,23 @@ void Accelerometer::unadjustedReadAccelerometer(void)
     uint8_t zlo = Wire.read();
     uint8_t zhi = Wire.read();
 
-    rx = (int) ((xhi << 8) | xlo) >> 4;
-    ry = (int) ((yhi << 8) | ylo) >> 4;
-    rz = (int) ((zhi << 8) | zlo) >> 4;
+    rx = (int) ((xhi << 8) | xlo);
+    ry = (int) ((yhi << 8) | ylo);
+    rz = (int) ((zhi << 8) | zlo);
+
+    rx /= 16;
+    ry /= 16;
+    rz /= 16;
 }
 
 
 void Accelerometer::normalize(void)
 {
     unadjustedReadAccelerometer();
+
+    _min.minumum(rx, ry, rz);
+    _max.maximum(rx, ry, rz);
+    _difference = _max - _min;
 
     _sx += rx;
     _sy += ry;
@@ -81,9 +93,21 @@ void Accelerometer::readAccelerometer(void)
 {
     unadjustedReadAccelerometer();
 
-    Geometry::Point p(ax * ((float) rx) + bx,
-                      ay * ((float) ry) + by,
-                      az * ((float) rz) + bz);
+    // rx = 0;
+    // ry = 0;
+    // rz = 0;
+
+    // Serial.print("rx = "); Serial.print(rx);
+
+    // rx = rx & 0xf000;
+    // ry = rx & 0xf000;
+    // rz = rx & 0xf000;
+
+    // Serial.print(", rx = "); Serial.println(rx);
+
+    // rx = (rx / (2 * _difference.x)) * 2 * _difference.x;
+    // ry = (ry / (2 * _difference.y)) * 2 * _difference.y;
+    // rz = (rz / (2 * _difference.z)) * 2 * _difference.z;
 
     a = calibrate(Geometry::Point((float) rx, (float) ry, (float) rz));
 }

@@ -53,13 +53,18 @@ public:
 
     float a, b, c;  // Alpha, Beta, Gamma;
 
+    static EulerAngles fromDegrees(float a, float b, float c);
+
     EulerAngles(void) : a(0.0), b(0.0), c(0.0)
     {}
 
-    EulerAngles(float na, float nb, float nc) : a(DegToRad(na)), b(DegToRad(nb)), c(DegToRad(nc))
+    EulerAngles(float na, float nb, float nc) : a(na), b(nb), c(nc)
     {}
 
     EulerAngles(const EulerAngles &m);
+
+    EulerAngles operator *(float t) const;
+    EulerAngles operator +(const EulerAngles &e) const;
 };
 
 

@@ -34,9 +34,27 @@ Point Point::operator *(float t) const
 }
 
 
+EulerAngles EulerAngles::fromDegrees(float a, float b, float c)
+{
+    return EulerAngles(DegToRad(a), DegToRad(b), DegToRad(c));
+}
+
+
 EulerAngles::EulerAngles(const EulerAngles &m)
 : a(m.a), b(m.b), c(m.c)
 {}
+
+
+EulerAngles EulerAngles::operator *(float t) const
+{
+    return EulerAngles(a * t, b * t, c * t);
+}
+
+
+EulerAngles EulerAngles::operator +(const EulerAngles &e) const
+{
+    return EulerAngles(a + e.a, b + e.b, c + e.c);
+}
 
 
 RotationMatrix RotationMatrix::createLeftHanded(const EulerAngles &o)
@@ -57,13 +75,13 @@ RotationMatrix RotationMatrix::createLeftHanded(float a, float b, float c)
     float sb = sin(b);
     float sc = sin(c);
 
-    m.matrix[0][0] = cb * cc;
-    m.matrix[0][1] = -cb * sc;
-    m.matrix[0][2] = sb;
+    m.matrix[1][0] = cb * cc;
+    m.matrix[1][1] = cb * sc;
+    m.matrix[1][2] = -sb;
 
-    m.matrix[1][0] = ca * sc + sa * sb * cc;
-    m.matrix[1][1] = ca * cc - sa * sb * sc;
-    m.matrix[1][2] = -sa * cb;
+    m.matrix[0][0] = ca * sc + sa * sb * cc;
+    m.matrix[0][1] = ca * cc - sa * sb * sc;
+    m.matrix[0][2] = sa * cb;
 
     m.matrix[2][0] = sa * sc - ca * sb * cc;
     m.matrix[2][1] = sa * cc + ca * sb * sc;

@@ -1,3 +1,6 @@
+#ifndef __MOUSER_GYROSCOPE__
+#define __MOUSER_GYROSCOPE__
+
 #include <Arduino.h>
 #include "base-i2c.h"
 #include "geometry.h"
@@ -41,7 +44,7 @@ public:
     // Calibrated sensor values
     int16_t ax, ay, az;
 
-    // Degrees per second
+    // Radians per second
     Geometry::EulerAngles a;
 
     static Gyroscope *instance(void);
@@ -50,3 +53,5 @@ public:
     void readGyroscope(void);
 
 };
+
+#endif

@@ -67,6 +67,12 @@ void Gyroscope::unadjustedReadGyro(void)
     _uax = (int) ((xhi << 8) | xlo);
     _uay = (int) ((yhi << 8) | ylo);
     _uaz = (int) ((zhi << 8) | zlo);
+
+    const uint16_t mask = 0xffe0;
+
+    _uax &= mask;
+    _uay &= mask;
+    _uaz &= mask;
 }
 
 
@@ -78,9 +84,9 @@ void Gyroscope::readGyroscope(void)
     ay  = _uay - _ay;
     az  = _uaz - _az;
 
-    Geometry::EulerAngles m(multiplier * (float) ax,
-                            multiplier * (float) ay,
-                            multiplier * (float) az);
+    Geometry::EulerAngles m = Geometry::EulerAngles::fromDegrees(multiplier * (float) ax,
+                                                                 multiplier * (float) ay,
+                                                                 multiplier * (float) az);
 
     a = m;
 }
