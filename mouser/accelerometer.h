@@ -73,6 +73,8 @@ private:
     const uint8_t CTRL_REG2_A       = 0x21;
     const uint8_t CTRL_REG3_A       = 0x22;
     const uint8_t CTRL_REG4_A       = 0x23;
+    const uint8_t CTRL_REG5_A       = 0x24;
+    const uint8_t CTRL_REG6_A       = 0x25;
     const uint8_t OUT_X_L_A         = 0x28;
 
     const uint8_t REG1_XEN          = 0x01;     // X-axis enable (1=enable)
@@ -81,10 +83,12 @@ private:
     const uint8_t REG1_LPEN         = 0x08;     // Low-power enable (1=enable)
     const uint8_t REG1_10HZ         = 0x20;
     const uint8_t REG1_100HZ        = 0x50;
+    const uint8_t REG1_1KHZ         = 0x90;
 
     const uint8_t REG4_HR           = 0x08;     // High-resolution (1=enable)
     const uint8_t REG4_FS0          = 0x10;     // Full-scale selection
     const uint8_t REG4_FS1          = 0x20;     // 00=2g, 01=4g, 10=8g, 11=16g
+    const uint8_t REG4_BLE          = 0x40;     // Big/little endian (0: LSB MSB, 1: MSB LSB)
 
     const uint8_t REG4_FS_2         = 0x00;
     const uint8_t REG4_FS_4         = (REG4_FS0);

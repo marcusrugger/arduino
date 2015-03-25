@@ -115,11 +115,11 @@ void DoTick::print(void)
     // Serial.print(Gyroscope::instance()->a.c);
     // Serial.println();
 
-    // Serial.print("accelerometer: ");
-    // Serial.print(Accelerometer::instance()->a.x);   Serial.print(", ");
-    // Serial.print(Accelerometer::instance()->a.y);   Serial.print(", ");
-    // Serial.print(Accelerometer::instance()->a.z);
-    // Serial.println();
+    Serial.print("accelerometer: ");
+    Serial.print(Accelerometer::instance()->rx);   Serial.print(", ");
+    Serial.print(Accelerometer::instance()->ry);   Serial.print(", ");
+    Serial.print(Accelerometer::instance()->rz);
+    Serial.println();
 
     // Serial.print("angle: ");
     // Serial.print(ea.a);   Serial.print(", ");
@@ -133,9 +133,9 @@ void DoTick::print(void)
     // Serial.print(current_velocity.z);
     // Serial.println();
 
-    Serial.print("current_position: ");
-    Serial.print(current_position.x);   Serial.print(", ");
-    Serial.print(current_position.y);   Serial.print(", ");
-    Serial.print(current_position.z);
-    Serial.println();
+    // Serial.print("current_position: ");
+    // Serial.print(current_position.x);   Serial.print(", ");
+    // Serial.print(current_position.y);   Serial.print(", ");
+    // Serial.print(current_position.z);
+    // Serial.println();
 }

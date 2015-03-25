@@ -23,8 +23,12 @@ Accelerometer::Accelerometer(void)
   _difference(0, 0, 0),
   _number_of_samples(0)
 {
-    write8(CTRL_REG1_A, REG1_10HZ | REG1_XEN | REG1_YEN | REG1_ZEN);
+    write8(CTRL_REG1_A, REG1_1KHZ | REG1_XEN | REG1_YEN | REG1_ZEN);
+    write8(CTRL_REG2_A, 0x00);
+    write8(CTRL_REG3_A, 0x00);
     write8(CTRL_REG4_A, REG4_FS_2 | REG4_HR);
+    write8(CTRL_REG5_A, 0x00);
+    write8(CTRL_REG6_A, 0x00);
     uint8_t val = read8(CTRL_REG1_A);
     Serial.print("Accelerometer CTRL_REG1_A: ");
     Serial.println(val, HEX);
@@ -33,10 +37,9 @@ Accelerometer::Accelerometer(void)
 
 Geometry::Point Accelerometer::calibrate(const Geometry::Point & p) const
 {
-    // return Geometry::Point(-(ax * p.x + bx),
-    //                         (ay * p.y + by),
-    //                         (az * p.z + bz));
-    return Geometry::Point(-p.x, p.y, p.z);
+    return Geometry::Point(-(ax * p.x + bx),
+                            (ay * p.y + by),
+                            (az * p.z + bz));
 }
 
 
@@ -57,13 +60,9 @@ void Accelerometer::unadjustedReadAccelerometer(void)
     uint8_t zlo = Wire.read();
     uint8_t zhi = Wire.read();
 
-    rx = (int) ((xhi << 8) | xlo);
-    ry = (int) ((yhi << 8) | ylo);
-    rz = (int) ((zhi << 8) | zlo);
-
-    rx /= 16;
-    ry /= 16;
-    rz /= 16;
+    rx = (int) ((xhi << 8) | xlo) >> 4;
+    ry = (int) ((yhi << 8) | ylo) >> 4;
+    rz = (int) ((zhi << 8) | zlo) >> 4;
 }
 
 
@@ -93,21 +92,9 @@ void Accelerometer::readAccelerometer(void)
 {
     unadjustedReadAccelerometer();
 
-    // rx = 0;
-    // ry = 0;
-    // rz = 0;
-
-    // Serial.print("rx = "); Serial.print(rx);
-
-    // rx = rx & 0xf000;
-    // ry = rx & 0xf000;
-    // rz = rx & 0xf000;
-
-    // Serial.print(", rx = "); Serial.println(rx);
-
-    // rx = (rx / (2 * _difference.x)) * 2 * _difference.x;
-    // ry = (ry / (2 * _difference.y)) * 2 * _difference.y;
-    // rz = (rz / (2 * _difference.z)) * 2 * _difference.z;
+    rx = (rx / (2 * _difference.x)) * 2 * _difference.x;
+    ry = (ry / (2 * _difference.y)) * 2 * _difference.y;
+    rz = (rz / (2 * _difference.z)) * 2 * _difference.z;
 
     a = calibrate(Geometry::Point((float) rx, (float) ry, (float) rz));
 }
